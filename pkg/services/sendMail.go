@@ -14,11 +14,6 @@ type sendMailRequest struct {
 	Body    string   `json:"body" validate:"required"`
 }
 
-type sendMailResponse struct {
-	Status string                 `json:"status"`
-	Data   map[string]interface{} `json:"data"`
-}
-
 // SendMail sends an email to the user
 func SendMail(c *fiber.Ctx) error {
 
@@ -27,25 +22,11 @@ func SendMail(c *fiber.Ctx) error {
 	var req sendMailRequest
 
 	err := json.Unmarshal(request.Body(), &req)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "bad request",
-			"error":  err.Error(),
-		})
-	}
+	_ = HandleErrorResponse(c, fiber.StatusBadRequest, err)
 
 	validate := validator.New()
 	err = validate.Struct(req)
-	if err != nil {
-		var validationErrors []string
-		for _, err := range err.(validator.ValidationErrors) {
-			validationErrors = append(validationErrors, err.Error())
-		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "bad request",
-			"errors": validationErrors,
-		})
-	}
+	_ = HandleErrorResponse(c, fiber.StatusBadRequest, err)
 
 	mailInfo := mail.Mail{
 		From:    config.EnvConfigs.MailerSenderAddress,
@@ -54,14 +35,9 @@ func SendMail(c *fiber.Ctx) error {
 		Body:    req.Body,
 	}
 	err = mail.SendMail(mailInfo)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
-			"error":  err.Error(),
-		})
-	}
+	_ = HandleErrorResponse(c, fiber.StatusInternalServerError, err)
 
-	resp := sendMailResponse{
+	resp := Response{
 		Status: "success",
 		Data:   map[string]interface{}{},
 	}
