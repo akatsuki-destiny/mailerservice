@@ -17,6 +17,6 @@ RUN mkdir /app
 COPY --from=builder /app/mailerservice /app
 COPY ./dev.env ./dev.env
 
-EXPOSE 8082:8082
+EXPOSE 3002:3002
 
 CMD ["/app/mailerservice"]
