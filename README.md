@@ -12,5 +12,5 @@ docker build -t mailerservice .
 ```
 
 ```bash
-docker run -p 8082:8082 mailerservice
+docker run -p 3002:3002 mailerservice
 ```
