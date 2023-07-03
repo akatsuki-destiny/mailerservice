@@ -14,3 +14,7 @@ docker build -t mailerservice .
 ```bash
 docker run -p 3002:3002 mailerservice
 ```
+
+```bash
+make mailer
+```
