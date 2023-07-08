@@ -22,11 +22,23 @@ func SendMail(c *fiber.Ctx) error {
 	var req sendMailRequest
 
 	err := json.Unmarshal(request.Body(), &req)
-	_ = HandleErrorResponse(c, fiber.StatusBadRequest, err)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
+			Status:       "failed",
+			Error:        err,
+			ErrorMessage: "invalid request body",
+		})
+	}
 
 	validate := validator.New()
 	err = validate.Struct(req)
-	_ = HandleErrorResponse(c, fiber.StatusBadRequest, err)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
+			Status:       "failed",
+			Error:        err,
+			ErrorMessage: "invalid request body",
+		})
+	}
 
 	mailInfo := mail.Mail{
 		From:    config.EnvConfigs.MailerSenderAddress,
@@ -35,7 +47,13 @@ func SendMail(c *fiber.Ctx) error {
 		Body:    req.Body,
 	}
 	err = mail.SendMail(mailInfo)
-	_ = HandleErrorResponse(c, fiber.StatusInternalServerError, err)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(ErrorResponse{
+			Status:       "failed",
+			Error:        err,
+			ErrorMessage: "failed to send mail",
+		})
+	}
 
 	resp := Response{
 		Status: "success",
